@@ -82,12 +82,39 @@ main = do
                                   (SCons (SAtom (AIdent "world"))
                                          (SCons (SAtom (AIdent "hallo"))
                                                 SNil)))
+                , TestLabel "pretty print two lets and usage" $
+                      "(let\n\
+                      \ ((people (welt und leute))\n\
+                      \  (var1 (world and folks)))\n\
+                      \ ((hi var1) hallo people))\n" ~=?
+                            (pprintIt $
+                            (SCons (SAtom (AIdent "let"))
+                                   (SCons (SCons (SCons (SAtom (AIdent "people"))
+                                                        (SCons (SCons (SAtom (AIdent "welt"))
+                                                                      (SCons (SAtom (AIdent "und"))
+                                                                             (SCons (SAtom (AIdent "leute"))
+                                                                                    SNil)))
+                                                               SNil))
+                                                 (SCons (SCons (SAtom (AIdent "var1"))
+                                                               (SCons (SCons (SAtom (AIdent "world"))
+                                                                             (SCons (SAtom (AIdent "and"))
+                                                                                    (SCons (SAtom (AIdent "folks"))
+                                                                                           SNil)))
+                                                                      SNil))
+                                                        SNil))
+                                          (SCons (SCons (SCons (SAtom (AIdent "hi"))
+                                                               (SCons (SAtom (AIdent "var1"))
+                                                                      SNil))
+                                                        (SCons (SAtom (AIdent "hallo"))
+                                                               (SCons (SAtom (AIdent "people"))
+                                                                      SNil)))
+                                                 SNil))))
                 ]
               ]
             , TestLabel "round-trip" $ TestList $
               concatMap (\t -> map t srcs) $
               [ testParsePrint
-              ]
+               ]
             ]
   if errors counts + failures counts > 0
   then exitFailure
