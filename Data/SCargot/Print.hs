@@ -335,10 +335,14 @@ indentPrintSExpr2 SExprPrinter { .. } maxW sexpr =
             pps3' = pps3
             separateLines elems pEnd =
                 let lr = concatMap (fst . pTail pEnd) elems
-                in (wrapTWith False "(" ")" (indentWc ppsNext) "" lr, pEnd)
-        in if els > remWidth pps3 || length t1 > 1 || remWidth pps3 < numClose pps + 5
-           then separateLines others ppsMulti
-           else sameLine t3 pps3'
+                in (wrapTWith False "(" ")" (indentWc pps) "" lr, pEnd)
+        in if and [ els < remWidth pps
+                  , length t1 < 2
+                  , length t3 < 2
+                  , remWidth pps3 > (numClose pps + 5)
+                  ]
+           then sameLine t3 pps3'
+           else separateLines others ppsMulti
     --  For an SDecl, always put the first element on the line.  If
     --  *all* other elements fit on the same line, do that, otherwise
     --  all other elements should appear on subsequent lines with
