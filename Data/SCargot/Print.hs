@@ -309,19 +309,7 @@ indentPrintSExpr2 SExprPrinter { .. } maxW sexpr =
     pHead pps (SJoin _ []) = ( [], pps )
     pHead pps (SJoin els others) =
         let (t1,_) = pHead pps $ head others
-            (t3,pps3) = foldl pTail' ([], pps) others
-            pTail' :: ([(Indenting, Text)], PPS)
-                   -> SElem
-                   -> ([(Indenting, Text)], PPS)
-            pTail' (rl,pp) ne = let (rt,pr) = pTail pp ne
-                                    hrl = head rl
-                                    hrt = head rt
-                                in if length rt == 1
-                                   then case length rl of
-                                          0 -> (rt, pr)
-                                          1 -> ((fst hrl, snd hrl <> " " <> snd hrt):[], pr)
-                                          _ -> (rl <> rt, pr)
-                                   else (rl <> rt, pr)
+            (t3,pps3) = foldl foldPTail ([], pps) others
             sameLine parts pEnd = (wrapT (indentWc ppsSame) "" parts, pEnd)
             ppsNext = pps { indentWc = nextIndent (indentWc pps)
                           , remWidth = remWidth pps - indentAmount
@@ -372,15 +360,6 @@ indentPrintSExpr2 SExprPrinter { .. } maxW sexpr =
             tothers' = concatMap (fst . pTail pps1') $ tail others -- multiline from 2nd
             (others', ppone) = foldl foldPTail ([],pps1) others -- oneline
             (others'', ppone') = foldl foldPTail ([],pps1') $ tail others -- multiline from 2nd
-            foldPTail (tf,ppf) o = let (ot,opp) = pTail ppf o
-                                       tf1 = head tf
-                                       tr = if length ot == 1
-                                            then case length tf of
-                                                   0 -> ot
-                                                   1 -> [(fst tf1, snd tf1 <> " " <> snd (head ot))]
-                                                   _ -> tf ++ ot
-                                            else tf ++ ot
-                                   in (tr, opp)
             separateLines l r p =
                 let wr = if null r then []
                          else wrapTWith True "" ")" (indentWc p) "" r
@@ -402,6 +381,16 @@ indentPrintSExpr2 SExprPrinter { .. } maxW sexpr =
 
 
     pTail = pHead
+
+    foldPTail (tf,ppf) o = let (ot,opp) = pTail ppf o
+                               tf1 = head tf
+                               tr = if length ot == 1
+                                    then case length tf of
+                                           0 -> ot
+                                           1 -> [(fst tf1, snd tf1 <> " " <> snd (head ot))]
+                                           _ -> tf ++ ot
+                                    else tf ++ ot
+                           in (tr, opp)
 
 
 wrapTWith :: Bool -> T.Text -> T.Text -> IndentSpec
